@@ -3,6 +3,7 @@
 from flask import Flask,request,render_template,Response
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
+from sqlalchemy_utils.functions import database_exists
 from yaml import load as yload,FullLoader
 from os.path import exists,join
 from model import DatasetType,Dataset,Tag,TagType,Status,Text,db,DatasetTypeView,DatasetView,TextView,TagTypeView,TagView
@@ -10,8 +11,19 @@ from model import DatasetType,Dataset,Tag,TagType,Status,Text,db,DatasetTypeView
 def register_extensions(app):
     print('register_extensions')
     db.init_app(app)
-    with app.app_context():
-        db.create_all()
+
+    if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
+        with app.app_context():
+            db.create_all()
+            db.session.add(DatasetType(name='token-classification'))
+            db.session.add(DatasetType(name='text-classification'))
+            db.session.add(TagType(name='PER'))
+            db.session.add(TagType(name='ORG'))
+            db.session.add(TagType(name='LOC'))
+            db.session.add(TagType(name='WRK'))
+            db.session.add(TagType(name='EVT'))
+            db.session.add(TagType(name='OBJ'))
+            db.session.commit()
 
 def create_app():
     app = Flask(__name__)
@@ -42,16 +54,12 @@ def index():
     return Response(str(Tag.query.all()), mimetype='text/plain')
 
 
-@app.route('/_init')
-def init():
-    dt = DatasetType(name='POS')
-    d = Dataset(name='SUC 3.0 POS', type=dt)
-    t = Text(content='Jag heter Martin.', dataset=d)
-    tt = TagType(name='PER')
-    tag = Tag(type=tt, text=t, start=10, stop=16)
+@app.route('/text/<int:text_id>')
+def validate(text_id):
+    text = db.session.query(Text).filter(Text.id == text_id).first()
+
+    if text:
+        return render_template('validate.html', text=text)
+    else:
+        return 'Not found', 404
     
-    db.session.add(dt)
-    db.session.commit()
-
-    return 'Done'
-
