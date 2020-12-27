@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 from flask import Flask,request,render_template,Response
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
 from yaml import load as yload,FullLoader
 from os.path import exists,join
-from model import DatasetType,Dataset,Tag,TagType,Status,Text,db
-
+from model import DatasetType,Dataset,Tag,TagType,Status,Text,db,DatasetTypeView,DatasetView,TextView,TagTypeView,TagView
 
 def register_extensions(app):
     print('register_extensions')
@@ -23,6 +24,14 @@ def create_app():
 
     app.jinja_env.line_statement_prefix = '#'
     register_extensions(app)
+
+    app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
+    admin = Admin(app, name='tagit', template_mode='bootstrap3')
+    admin.add_view(DatasetTypeView(DatasetType, db.session))
+    admin.add_view(DatasetView(Dataset, db.session))
+    admin.add_view(TextView(Text, db.session))
+    admin.add_view(TagTypeView(TagType, db.session))
+    admin.add_view(TagView(Tag, db.session))
 
     return app
 

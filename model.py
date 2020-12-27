@@ -1,5 +1,6 @@
 from enum import Enum
 from exts import db
+from flask_admin.contrib.sqla import ModelView
 
 class Status(Enum):
     UNKNOWN = 0
@@ -16,6 +17,11 @@ class DatasetType(db.Model):
     def __repr__(self):
         return f'<DatasetType id={self.id}, name={self.name}>'
 
+dataset_tagtype = db.Table('dataset_tagtype', db.Model.metadata,
+    db.Column('dataset_id', db.Integer, db.ForeignKey('dataset.id')),
+    db.Column('tagtype_id', db.Integer, db.ForeignKey('tagtype.id'))
+)
+
 class Dataset(db.Model):
     __tablename__ = 'dataset'
     id = db.Column(db.Integer, primary_key=True)
@@ -23,9 +29,10 @@ class Dataset(db.Model):
     type = db.relationship('DatasetType', backref=db.backref('datasets', lazy=True))
     name = db.Column(db.String(64), unique=True, nullable=False)
     description = db.Column(db.Text, nullable=True, default='')
+    tag_types = db.relationship("TagType", secondary=dataset_tagtype)
 
     def __repr__(self):
-        return f'<Dataset id={self.id}, name={self.name}, status={self.status}>'
+        return f'<Dataset id={self.id}, name={self.name}>'
 
 class Text(db.Model):
     __tablename__ = 'text'
@@ -61,6 +68,28 @@ class Tag(db.Model):
         return f'<Tag id={self.id}, start={self.start}, stop={self.stop}, type={self.type}, text_id={self.text.id}>'
 
 
+class DatasetTypeView(ModelView):
+    column_display_pk = True
+    form_columns = ('name',)
+
+class DatasetView(ModelView):
+    column_display_pk = True
+    form_columns = ('name', 'description', 'type', 'tag_types')
+    column_list = ('id', 'name', 'description', 'type', 'tag_types')
+
+class TextView(ModelView):
+    column_display_pk = True
+    form_columns = ('dataset', 'content', 'status')
+    column_list = ('id', 'content', 'status', 'dataset')
+
+class TagTypeView(ModelView):
+    column_display_pk = True
+    form_columns = ('name', 'description')
+
+class TagView(ModelView):
+    column_display_pk = True
+    form_columns = ('type', 'text_id', 'start', 'stop')
+    column_list = ('id', 'start', 'stop', 'type', 'text')
 
 
 
