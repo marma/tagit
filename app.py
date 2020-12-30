@@ -3,10 +3,12 @@
 from flask import Flask,request,render_template,Response
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
+from flask_migrate import Migrate
 from sqlalchemy_utils.functions import database_exists
 from yaml import load as yload,FullLoader
 from os.path import exists,join
 from model import DatasetType,Dataset,Tag,TagType,Status,Text,db,DatasetTypeView,DatasetView,TextView,TagTypeView,TagView
+from utils import tag_content
 
 def register_extensions(app):
     print('register_extensions')
@@ -48,6 +50,7 @@ def create_app():
     return app
 
 app = create_app()
+migrate = Migrate(app, db)
 
 @app.route('/')
 def index():
@@ -59,7 +62,7 @@ def validate(text_id):
     text = db.session.query(Text).filter(Text.id == text_id).first()
 
     if text:
-        return render_template('validate.html', text=text)
+        return render_template('validate.html', text=text, tagged=tag_content(text.content, text.tags))
     else:
         return 'Not found', 404
     

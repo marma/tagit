@@ -1,6 +1,7 @@
 from enum import Enum
 from exts import db
 from flask_admin.contrib.sqla import ModelView
+from sqlalchemy_utils import ColorType
 
 class Status(Enum):
     UNKNOWN = 0
@@ -8,6 +9,8 @@ class Status(Enum):
     BROKEN = 2
     DELETED = 3
     CHANGED = 4
+    GENERATED = 5
+    PARTIAL = 6
 
 class DatasetType(db.Model):
     __tablename__ = 'datasettype'
@@ -50,6 +53,7 @@ class TagType(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(16), nullable=False)
     description = db.Column(db.Text, nullable=True)
+    color = db.Column(ColorType, nullable=False, default='#ff3f00')
 
     def __repr__(self):
         return f'<TagType id={self.id}, name={self.name}>'
@@ -84,7 +88,7 @@ class TextView(ModelView):
 
 class TagTypeView(ModelView):
     column_display_pk = True
-    form_columns = ('name', 'description')
+    form_columns = ('name', 'description', 'color')
 
 class TagView(ModelView):
     column_display_pk = True

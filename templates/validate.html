@@ -1,8 +1,10 @@
-<html>
-    <body>
-    {{ text.content }}
-    # for tag in text.tags:
-    <b>{{ tag.type.name }}</b>
-    # endfor
-    </body>
-</html>
+# extends "base.html"
+# block content
+    <h1 class="ui header">Validate</h1>
+    {{ tagged | safe }}
+
+    <p>
+        <div class="content">Jag heter <div class="ui huge label">Martin Malmsten<a class="detail">PER</a><i class="delete icon"></i></div> och jobbar på <div class="ui label">Kungliga biblioteket<a class="detail">ORG</a><i class="delete icon"></i></div></div>.</div>
+    </p>
+
+# endblock
