@@ -1,10 +1,76 @@
 # extends "base.html"
+
+# block css
+            # if text:
+            #   for tagtype in text.dataset.tag_types:
+            .{{tagtype.name}} {
+                background: {{ tagtype.color }}5f;
+                padding: 0.5em;
+                border-radius: 0.25em;
+            }
+
+            .{{ tagtype.name }}::after {
+                //content: "{{ tagtype.name }}";
+                color: white;
+                padding: 0.2em;
+                margin-left: 0.5em;
+                border-radius: 0.25em;
+                font-family: sans-serif;
+                //font-size: 0.75em;
+                background: {{ tagtype.color }};
+            }
+
+            #   endfor
+            # endif
+# endblock
+
 # block content
     <h1 class="ui header">Validate</h1>
-    {{ tagged | safe }}
+    <div id="text">{{ tagged | safe }}</div>
 
     <p>
-        <div class="content">Jag heter <div class="ui huge label">Martin Malmsten<a class="detail">PER</a><i class="delete icon"></i></div> och jobbar på <div class="ui label">Kungliga biblioteket<a class="detail">ORG</a><i class="delete icon"></i></div></div>.</div>
+        <div id="sdf" class="content">Jag heter <div class="ui huge label">Martin Malmsten<a class="detail">PER</a><i class="delete icon"></i></div> och jobbar på <div class="ui label">Kungliga biblioteket<a class="detail">ORG</a><i class="delete icon"></i></div></div>.</div>
     </p>
 
+    <div>
+        <span id="selection"></span> - <span id="selection_offset"></span> - <span id="selection_length"></span>
+    </div>
+
+# endblock
+
+# block afterbody
+    <script>
+        let currentTagtype = 
+
+        function setTagType(t) {
+            currentTagType = t;
+        }
+
+        setTagType("{{ text.dataset.tag_types[0].name }}");
+
+        document.getElementById('text').addEventListener('mouseup', function() {
+            let selection = document.getSelection();
+            let {anchorNode, anchorOffset, focusNode, focusOffset} = selection;
+
+            if (selection.toString().length > 0) {
+                document.getElementById('selection').innerHTML = selection;
+                document.getElementById('selection_offset').innerHTML = `${anchorNode && anchorNode.data}:${anchorOffset}`;
+                document.getElementById('selection_length').innerHTML = `${focusNode && focusNode.data}:${focusOffset}`;
+
+                let text = selection
+                range = selection.getRangeAt(0)
+                entity = document.createElement("span");
+                entity.setAttribute("class", currentTagtype);
+                entity.innerHTML = `${selection}`;
+                range.deleteContents();
+                range.insertNode(entity)
+                selection.empty();
+            } else {
+                document.getElementById('selection').innerHTML = '';
+                document.getElementById('selection_offset').innerHTML = '';
+                document.getElementById('selection_length').innerHTML = '';
+            }
+
+        }, false);
+    </script>
 # endblock
