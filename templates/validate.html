@@ -40,7 +40,7 @@
 
 # block afterbody
     <script>
-        let currentTagtype = 
+        var currentTagType = null;
 
         function setTagType(t) {
             currentTagType = t;
@@ -60,7 +60,7 @@
                 let text = selection
                 range = selection.getRangeAt(0)
                 entity = document.createElement("span");
-                entity.setAttribute("class", currentTagtype);
+                entity.setAttribute("class", currentTagType);
                 entity.innerHTML = `${selection}`;
                 range.deleteContents();
                 range.insertNode(entity)
