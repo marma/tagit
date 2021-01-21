@@ -1,12 +1,17 @@
 # extends "base.html"
 
 # block css
+            {{'#'}}text {
+                font-size: 3em;
+            }
+
             # if text:
             #   for tagtype in text.dataset.tag_types:
             .{{tagtype.name}} {
-                background: {{ tagtype.color }}5f;
-                padding: 0.5em;
-                border-radius: 0.25em;
+                background: {{ tagtype.color }};
+                padding: 0.25em;
+                border-radius: 0.15em;
+                color: black;
             }
 
             .{{ tagtype.name }}::after {
@@ -26,12 +31,19 @@
 
 # block content
     <h1 class="ui header">Validate</h1>
+    <div>
+        <b>Tags:</b>
+        # for tagtype in text.dataset.tag_types:
+        <a class="{{tagtype.name}}" onclick="setTagType('{{tagtype.name}}')"><b>{{ tagtype.name }}</b></a>
+        # endfor
+    </div>
     <div id="text">{{ tagged | safe }}</div>
 
-    <p>
+    <!--p>
         <div id="sdf" class="content">Jag heter <div class="ui huge label">Martin Malmsten<a class="detail">PER</a><i class="delete icon"></i></div> och jobbar på <div class="ui label">Kungliga biblioteket<a class="detail">ORG</a><i class="delete icon"></i></div></div>.</div>
-    </p>
+    </p-->
 
+    <a onclick="clearAll()">RENSA</a>
     <div>
         <span id="selection"></span> - <span id="selection_offset"></span> - <span id="selection_length"></span>
     </div>
@@ -45,6 +57,11 @@
         function setTagType(t) {
             currentTagType = t;
         }
+
+        function clearAll() {
+            document.getElementById('text').innerHTML = document.getElementById('text').innerHTML.replace(/(<([^>]+)>)/gi, "")
+        }
+
 
         setTagType("{{ text.dataset.tag_types[0].name }}");
 
