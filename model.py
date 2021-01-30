@@ -6,11 +6,12 @@ from sqlalchemy_utils import ColorType
 class Status(Enum):
     UNKNOWN = 0
     VERIFIED = 1
-    BROKEN = 2
-    DELETED = 3
-    CHANGED = 4
-    GENERATED = 5
-    PARTIAL = 6
+    INCORRECT = 2
+    BROKEN = 3
+    DELETED = 4
+    CHANGED = 5
+    GENERATED = 6
+    PARTIAL = 7
 
 class DatasetType(db.Model):
     __tablename__ = 'datasettype'
@@ -71,6 +72,27 @@ class Tag(db.Model):
     def __repr__(self):
         return f'<Tag id={self.id}, start={self.start}, stop={self.stop}, type={self.type}, text_id={self.text.id}>'
 
+class TaggerType(db.Model):
+    __tablename__ = 'taggertype'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(16), unique=True, nullable=False)    
+    description = db.Column(db.Text, nullable=True)
+
+    def __repr__(self):
+        return f'<TaggerType id={self.id}, name={self.name}>'
+
+class Tagger(db.Model):
+    __tablename__ = 'tagger'
+    id = db.Column(db.Integer, primary_key=True)
+    type_id = db.Column(db.Integer, db.ForeignKey('taggertype.id'), nullable=False)
+    type = db.relationship('TaggerType', backref=db.backref('taggers', lazy=True))
+    name = db.Column(db.String(16), unique=True, nullable=False)
+    url = db.Column(db.String(1024), nullable=True)
+    description = db.Column(db.Text, nullable=True)
+
+    def __repr__(self):
+        return f'<Tagger id={self.id}, name={self.name}, description={self.description}>'
+
 
 class DatasetTypeView(ModelView):
     column_display_pk = True
@@ -94,6 +116,17 @@ class TagView(ModelView):
     column_display_pk = True
     form_columns = ('type', 'text_id', 'start', 'stop')
     column_list = ('id', 'start', 'stop', 'type', 'text')
+
+class TaggerTypeView(ModelView):
+    column_display_pk = True
+    form_columns = ('name', 'description')
+
+class TaggerView(ModelView):
+    column_display_pk = True
+    form_columns = ('type', 'name', 'url', 'description')
+    column_list = ('id', 'type', 'name', 'description')
+
+
 
 
 

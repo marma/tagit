@@ -11,11 +11,11 @@ services:
             - data:/data
         command: /usr/local/bin/gunicorn -k gevent --reload --workers 1 --worker-connections 2 --access-logfile=- --pythonpath /app -b :5000 app:app
 
-    db:
-        image: postgres:13.1
-        restart: always
-        environment:
-            POSTGRES_PASSWORD: example
+#    db:
+#        image: postgres:13.1
+#        restart: always
+#        environment:
+#            POSTGRES_PASSWORD: example
 
     adminer:
         image: adminer

@@ -3,14 +3,14 @@
 def tag_content(content, tags):
     offset = 0
 
-    for t in tags:
+    for t in sorted(tags, key=lambda x: x.start):
         #start_tag = f'<span class="{t.type.name}">'
         #end_tag = '</span>'
         #start_tag = f'<div class="ui left labeled button"><a class="ui basic label">'
         #end_tag = f'</a><div class="ui icon button">{t.type.name}</div></div>'
         #start_tag = f'<div class="ui label" style="background: {t.type.color}7f">'
         #end_tag = f'<a class="detail">{t.type.name}</a><i class="delete icon"></i></div>'
-        start_tag = f'<span class="tag">'
+        start_tag = f'<span class="{t.type.name}">'
         end_tag = f'</span>'
 
         content = content[:t.start + offset] + \
@@ -20,6 +20,8 @@ def tag_content(content, tags):
                   content[t.stop + offset:]
 
         offset += len(start_tag) + len(end_tag)
+
+        print(content)
 
     return content
 
