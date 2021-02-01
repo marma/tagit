@@ -34,6 +34,8 @@ class Dataset(db.Model):
     name = db.Column(db.String(64), unique=True, nullable=False)
     description = db.Column(db.Text, nullable=True, default='')
     tag_types = db.relationship("TagType", secondary=dataset_tagtype)
+    tagger_id = db.Column(db.Integer, db.ForeignKey('tagger.id'), nullable=True)
+    tagger = db.relationship('Tagger', backref=db.backref('datasets'), lazy=True)
 
     def __repr__(self):
         return f'<Dataset id={self.id}, name={self.name}>'
@@ -100,7 +102,7 @@ class DatasetTypeView(ModelView):
 
 class DatasetView(ModelView):
     column_display_pk = True
-    form_columns = ('name', 'description', 'type', 'tag_types')
+    form_columns = ('name', 'description', 'type', 'tag_types', 'tagger')
     column_list = ('id', 'name', 'description', 'type', 'tag_types')
 
 class TextView(ModelView):

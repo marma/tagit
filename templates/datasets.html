@@ -1,0 +1,47 @@
+# extends "base.html"
+
+# block css
+# endblock
+
+# block content
+    <h1 class="ui header">Datasets</h1>
+    <div class="ui cards">
+    # for dataset in datasets:
+        <div class="card">
+            <div class="content">
+                <div class="header">{{ dataset.name }}</div>
+                <div class="meta">{{ (100*counts[dataset.id]['VERIFIED'] / ([ counts[dataset.id]['sum'], 1 ] | max)) | int }}% verified ({{ counts[dataset.id]['VERIFIED'] }} / {{ counts[dataset.id]['sum'] }})</div>
+                
+                <div class="description">{{ dataset.description }}</div>
+                <div class="description">&nbsp;</div>    
+                <div class="description"><b>Type</b>: {{ dataset.type.name }}</div>
+                <div class="description"><b>Tagger</b>: {{ dataset.tagger.name | default('None')}}</div>
+            </div>
+            <div class="extra content">
+                <div class="ui tiny buttons">
+                    <div class="ui green button">View</div>
+                    # if counts[dataset.id]['UNKNOWN'] > 0:
+                    <div class="ui green button">
+                        <a href="/dataset/{{ dataset.id }}/_random">Verify</a>
+                    </div>
+                    # else
+                    <div class="ui green disabled button">Verify</div>
+                    # endif
+                    <div class="ui green button">Add</div>
+                    <div class="ui green button">Export</div>
+                </div>
+            </div>
+        </div>
+    # endfor
+    </div>
+    <br/>
+    <div>
+        <button class="ui large icon button"><i class="ui icon add"></i></button>
+    </div>
+    <!-- {{ counts }} -->
+# endblock
+
+# block afterbody
+    <script>
+    </script>
+# endblock

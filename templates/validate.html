@@ -136,7 +136,8 @@
             fetch("/_validate", { method: "POST", body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' }})
                 .then(data => console.log(data))
 
-            originalText = document.getElementById("text").innerHTML
+            window.location.replace("/dataset/{{ text.dataset.id }}/_random");
+            //originalText = document.getElementById("text").innerHTML
         }
 
         function submit_incorrect() {
@@ -144,6 +145,8 @@
             
             fetch("/_validate", { method: "POST", body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' }})
                 .then(data => console.log(data))
+
+            window.location.replace("/dataset/{{ text.dataset.id }}/_random");
         }
 
         function submit_broken() {
@@ -151,6 +154,8 @@
             
             fetch("/_validate", { method: "POST", body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' }})
                 .then(data => console.log(data))
+
+            window.location.replace("/dataset/{{ text.dataset.id }}/_random");
         }
 
         function submit_deleted() {
@@ -158,6 +163,8 @@
             
             fetch("/_validate", { method: "POST", body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' }})
                 .then(data => console.log(data))
+
+            window.location.replace("/dataset/{{ text.dataset.id }}/_random");
         }
 
         function skip() {

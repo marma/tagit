@@ -5,10 +5,13 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_migrate import Migrate
 from sqlalchemy_utils.functions import database_exists
+from sqlalchemy import func
 from yaml import load as yload,FullLoader
 from os.path import exists,join
 from model import DatasetType,Dataset,Tag,TagType,Status,Text,TaggerType,Tagger,db,DatasetTypeView,DatasetView,TextView,TagTypeView,TagView,TaggerView,TaggerTypeView
 from utils import tag_content
+from collections import Counter
+from random import random
 
 def register_extensions(app):
     print('register_extensions')
@@ -19,6 +22,7 @@ def register_extensions(app):
             db.create_all()
             db.session.add(DatasetType(name='token-classification'))
             db.session.add(DatasetType(name='text-classification'))
+            db.session.add(DatasetType(name='question-answering'))
             db.session.add(TagType(name='PER', color='red'))
             db.session.add(TagType(name='ORG', color='orange'))
             db.session.add(TagType(name='LOC', color='yellow'))
@@ -26,8 +30,9 @@ def register_extensions(app):
             db.session.add(TagType(name='EVT', color='green'))
             db.session.add(TagType(name='OBJ', color='purple'))
             db.session.add(TagType(name='TME', color='pink'))
-            db.session.add(TaggerType(name='NER'))
-            db.session.add(TaggerType(name='POS'))
+            db.session.add(TaggerType(name='token-classification'))
+            db.session.add(TaggerType(name='text-classification'))
+            db.session.add(TaggerType(name='question-answering'))
         else:
             db.create_all()
         
@@ -62,7 +67,37 @@ migrate = Migrate(app, db)
 
 @app.route('/')
 def index():
-    return Response(str(Tag.query.all()), mimetype='text/plain')
+    return Response('', headers={ 'Location': '/datasets/' }), 303
+
+
+@app.route('/datasets/')
+def datasets():
+    datasets = datasets=Dataset.query.all()
+    counts = { dataset.id:Counter() for dataset in datasets }   
+
+    for dataset_id, status, count in db.session.query(
+                                        Text.dataset_id,
+                                        Text.status,
+                                        func.count(Text.id)).group_by(
+                                            Text.dataset_id,
+                                            Text.status).all():
+        if status in [ Status.UNKNOWN, Status.INCORRECT, Status.VERIFIED ]:
+            counts[dataset_id][status.name] = count 
+            counts[dataset_id].update({ 'sum': count })
+
+    return render_template('datasets.html', datasets=datasets, counts=counts)
+
+
+@app.route('/taggers/')
+def taggers():
+    return render_template('taggers.html', taggers=Tagger.query.all())
+
+
+@app.route('/dataset/<int:dataset_id>')
+def dataset(dataset_id):
+    dataset = db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
+
+    return render_template('dataset.html', dataset=dataset)
 
 
 @app.route('/text/<int:text_id>')
@@ -74,6 +109,18 @@ def text(text_id):
     else:
         return 'Not found', 404
 
+@app.route('/dataset/<int:dataset_id>/_random')
+def random_text(dataset_id):
+    for status in [ Status.INCORRECT, Status.UNKNOWN ]:
+        n_texts = db.session.query(Text).filter(Text.status == status).count()
+
+        if n_texts > 0:
+            n = int(n_texts*random())
+            text = db.session.query(Text).filter(Dataset.id == dataset_id, Text.status == status).limit(1).offset(n).first()
+
+            return Response('', headers={ 'Location': f'/text/{text.id}' }), 303
+
+    return Response('', headers={ 'Location': f'/datasets/' }), 303
 
 @app.route('/_validate', methods=[ 'POST' ])
 def validate():
@@ -147,6 +194,7 @@ def validate():
             text.status = Status.DELETED
     else:
         return 'Not found', 404
+
 
 
 
