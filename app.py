@@ -14,11 +14,12 @@ from collections import Counter
 from random import random
 
 def register_extensions(app):
-    #print('register_extensions')
+    print('register_extensions')
     db.init_app(app)
 
     with app.app_context():
         if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
+            print('Init db with default values')
             db.create_all()
             db.session.add(DatasetType(name='token-classification'))
             db.session.add(DatasetType(name='text-classification'))
