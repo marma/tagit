@@ -1,0 +1,26 @@
+# extends "base.html"
+
+# block css
+# endblock
+
+# block content
+    <h1 class="ui header">Add texts</h1>
+    <form class="ui form" action="add" method="POST">
+        <div class="field">
+            <label>Text</label>
+            <textarea name="data" rows="20"></textarea>
+        </div>
+        <select name="mode">
+            <option value="lines">Lines</option>
+            <option value="conll">CONLL</option>
+            <option value="chunks">Chunks</option>
+        </select>
+        <br/>
+        <input type="submit"  class="ui submit button">Submit</input>
+    </form>
+# endblock
+
+# block afterbody
+    <script>
+    </script>
+# endblock

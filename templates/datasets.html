@@ -19,16 +19,14 @@
             </div>
             <div class="extra content">
                 <div class="ui tiny buttons">
-                    <div class="ui green button">View</div>
+                    <a class="ui green button" href="/dataset/{{ dataset.id }}">View</a>
                     # if counts[dataset.id]['UNKNOWN'] > 0:
-                    <div class="ui green button">
-                        <a href="/dataset/{{ dataset.id }}/_random">Verify</a>
-                    </div>
+                    <a class="ui green button" href="/dataset/{{ dataset.id }}/_random">Verify</a>
                     # else
                     <div class="ui green disabled button">Verify</div>
                     # endif
-                    <div class="ui green button">Add</div>
-                    <div class="ui green button">Export</div>
+                    <a class="ui green button" href="/dataset/{{ dataset.id }}/add">Add</a>
+                    <div class="ui green disabled button">Export</div>
                 </div>
             </div>
         </div>

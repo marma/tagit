@@ -14,9 +14,9 @@ from collections import Counter
 from random import random
 
 def register_extensions(app):
-    print('register_extensions')
+    #print('register_extensions')
     db.init_app(app)
-    
+
     with app.app_context():
         if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
             db.create_all()
@@ -27,15 +27,16 @@ def register_extensions(app):
             db.session.add(TagType(name='ORG', color='orange'))
             db.session.add(TagType(name='LOC', color='yellow'))
             db.session.add(TagType(name='WRK', color='olive'))
-            db.session.add(TagType(name='EVT', color='green'))
+            db.session.add(TagType(name='EVN', color='green'))
             db.session.add(TagType(name='OBJ', color='purple'))
             db.session.add(TagType(name='TME', color='pink'))
+            db.session.add(TagType(name='MSR', color='pink'))
             db.session.add(TaggerType(name='token-classification'))
             db.session.add(TaggerType(name='text-classification'))
             db.session.add(TaggerType(name='question-answering'))
         else:
             db.create_all()
-        
+
         db.session.commit()
 
 def create_app():
@@ -111,7 +112,7 @@ def text(text_id):
 
 @app.route('/dataset/<int:dataset_id>/_random')
 def random_text(dataset_id):
-    for status in [ Status.INCORRECT, Status.UNKNOWN ]:
+    for status in [ Status.UNKNOWN, Status.INCORRECT ]:
         n_texts = db.session.query(Text).filter(Text.status == status).count()
 
         if n_texts > 0:
@@ -121,6 +122,108 @@ def random_text(dataset_id):
             return Response('', headers={ 'Location': f'/text/{text.id}' }), 303
 
     return Response('', headers={ 'Location': f'/datasets/' }), 303
+
+@app.route('/dataset/<int:dataset_id>/add', methods=[ 'GET' ])
+def add_texts(dataset_id):
+    dataset = db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
+
+    return render_template('add_texts.html', dataset=dataset)
+
+@app.route('/dataset/<int:dataset_id>/add', methods=[ 'POST' ])
+def post_add_texts(dataset_id):
+    def get_type_id(tname, text):
+        #print(tname, text)
+        for tt in text.dataset.tag_types:
+            if tt.name == tname:
+                return tt.id
+
+        print(f'warning: tag {tname} does not exist')
+
+    mode = request.form.get('mode', 'line')
+    data = request.form.get('data', '')
+    status = Status[request.form.get('status', 'unknown').upper()]
+    dataset = db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
+
+    if dataset == None:
+        return 'Not found', 404
+
+    if mode == 'lines':
+        for line in data.split('\n'):
+            if line.strip() != '':
+                dataset.texts.append(Text(dataset_id=dataset_id, content=line, status=Status.UNKNOWN))
+
+        db.session.commit()
+    elif mode == 'conll':
+        def combine(chunk):
+            l2 = []
+            l3 = []
+            last_type = None
+            for token in chunk:
+                if token['word'] in [ '[CLS]', '[SEP]' ]:
+                    continue
+
+                if last_type != token['entity'] and l3:
+                    l2 += [ { 'word': ' '.join([ x['word'] for x in l3 ]),
+                              'entity': last_type } ]
+                    l3 = [ token ]
+                else:
+                    l3 += [ token ]
+
+                last_type = token['entity']
+
+            l2 += [ { 'word': ' '.join([ x['word'] for x in l3 ]), 'entity': last_type } ]            
+
+            return l2
+
+
+        def chunkit(data):
+            chunk = []
+            for line in data.split('\n'):
+                if line.strip() == '':
+                    if chunk != []:
+                        yield combine(chunk)
+                        chunk = []
+                        tags = []
+                        i = 0
+                else:
+                    chunk += [ { 'word': line.split()[0], "entity": line.split()[1] } ]
+
+            if chunk != []:
+                yield combine(chunk)
+
+        for chunk in chunkit(data):
+            #print(chunk)
+            content = ''
+            for token in chunk:
+                #print(token)
+                # ignore 'O' token
+                if token['entity'] != 'O':
+                    token['start'] = len(content) + (0 if content == '' else 1)
+                    token['stop'] = token['start'] + len(token['word'])
+
+                content += (' ' if len(content) != 0 else '') + token['word']
+
+            tags = [ x for x in chunk if x['entity'] != 'O' ]
+
+            # add text
+            text = Text(dataset_id=dataset_id, content=content, status=status)
+            dataset.texts.append(text)
+
+            # add tags
+            for tag in tags:
+                tt = get_type_id(tag['entity'], text)
+                if tt != None:
+                    text.tags.append(
+                        Tag(type_id=tt,
+                            start=tag['start'],
+                            stop=tag['stop']))
+        
+        db.session.commit()
+
+        #print(text, tags)
+
+    return Response('', headers={ 'Location': f'/dataset/{dataset_id}' }), 303
+
 
 @app.route('/_validate', methods=[ 'POST' ])
 def validate():
@@ -161,8 +264,8 @@ def validate():
             if not in_tags(t, tags):
                     delete += [ t ]
 
-        print(add)
-        print(delete)
+        #print(add)
+        #print(delete)
 
         for t in add:
             text.tags.append(Tag(type_id=get_type_id(t['tag'], text), start=t['start'], stop=t['stop']))
@@ -185,21 +288,3 @@ def validate():
 
     return "OK"
 
-    if text:
-        if status == 'verified':
-            text.status = Status.VERFIFIED
-        elif status == 'broken':
-            text.status = Status.BROKEN
-        elif status == 'delete':
-            text.status = Status.DELETED
-    else:
-        return 'Not found', 404
-
-
-
-
-
-
-
-
-    

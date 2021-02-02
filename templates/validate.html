@@ -52,7 +52,7 @@
         <b>Tags:</b>
         <span id="tags">
         # for tagtype in text.dataset.tag_types:
-        <button id="tag_{{ tagtype.name }}" class="ui button inverted {{tagtype.color}} {{tagtype.name}}" onclick="setTagType('{{tagtype.name}}')">{{ tagtype.name }}</button>
+        <button id="tag_{{ tagtype.name }}" class="ui button inverted {{tagtype.color}} {{tagtype.name}}" onclick="setTagType('{{tagtype.name}}')">{{ loop.index }} - {{ tagtype.name }}</button>
         # endfor
         <button id="tag_clear" class="ui icon button" onclick="setTagType('clear')"><i class="ban alternate icon"></i></button>
         <button class="ui icon button" onclick="reset()"><i class="undo alternate icon"></i></button>
@@ -61,11 +61,20 @@
     <div id="text">{{ tagged | safe }}</div>
     <div style="width: 100%; text-align: center">
         <div class="ui buttons">
-            <button class="ui button" onclick="submit_verified()"><i class="check circle icon green"></i></button>
+            <button class="ui button" onclick="submit_verified()" data-variation="basic" data-position="bottom center" data-content="Submit verified (enter)"><i class="check circle icon green"></i></button>
             <button class="ui button" onclick="submit_incorrect()"><i class="close icon red"></i></button>
             <button class="ui button" onclick="submit_deleted()"><i class="trash icon"></i></button>
             <button class="ui button" onclick="submit_broken()"><i class="exclamation triangle icon red"></i></button>
+            <button class="ui button" onclick="skip()"><i class="right arrow icon"></i></button>
         </div>
+    </div>
+    <div style="padding-top: 3em; width: 100%; align: center">
+        <div>Keyboard shortcuts:</div>
+        <ul>
+            <li>Press <b>1-9</b> to select tag</li>
+            <li>Press <b>enter</b> to submit text as <b>correct</b>.</li>
+            <li>Press <b>x</b> to submit text as <b>incorrect</b>.</li>
+        </ul>
     </div>
 # endblock
 
@@ -136,7 +145,7 @@
             fetch("/_validate", { method: "POST", body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' }})
                 .then(data => console.log(data))
 
-            window.location.replace("/dataset/{{ text.dataset.id }}/_random");
+            window.location = "/dataset/{{ text.dataset.id }}/_random"
             //originalText = document.getElementById("text").innerHTML
         }
 
@@ -146,7 +155,7 @@
             fetch("/_validate", { method: "POST", body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' }})
                 .then(data => console.log(data))
 
-            window.location.replace("/dataset/{{ text.dataset.id }}/_random");
+            window.location = "/dataset/{{ text.dataset.id }}/_random";
         }
 
         function submit_broken() {
@@ -155,7 +164,7 @@
             fetch("/_validate", { method: "POST", body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' }})
                 .then(data => console.log(data))
 
-            window.location.replace("/dataset/{{ text.dataset.id }}/_random");
+            window.location = "/dataset/{{ text.dataset.id }}/_random"
         }
 
         function submit_deleted() {
@@ -164,17 +173,42 @@
             fetch("/_validate", { method: "POST", body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' }})
                 .then(data => console.log(data))
 
-            window.location.replace("/dataset/{{ text.dataset.id }}/_random");
+            window.location = "/dataset/{{ text.dataset.id }}/_random"
         }
 
         function skip() {
+            window.location = "/dataset/{{ text.dataset.id }}/_random"
         }
+
+        //$('.button')
+        //    .popup()
 
         reset()
 
         //setTagType("{{ text.dataset.tag_types[0].name }}");
 
         //$("#text span").attr("onmousedown", "clickTag(this)")
+
+        $(document).on("keydown", function (e) {
+            console.log(e)
+
+            if (e.keyCode == 13) {
+                // submit verified
+                submit_verified()
+            } else if (e.key == 'x') {
+                // submit incorrect
+                submit_incorrect()
+            } else if (e.keyCode == 39) {
+                // skip
+                skip()
+            } else if (e.key == '0') {
+                setTagType("clear")
+            # for tt in text.dataset.tag_types:
+            } else if (e.key == '{{ loop.index }}') {
+                setTagType("{{ text.dataset.tag_types[loop.index0].name }}")
+            # endfor
+            }
+        })
 
         document.getElementById('text').addEventListener('mouseup', function() {
             let selection = document.getSelection();

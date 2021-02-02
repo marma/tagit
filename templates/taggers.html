@@ -4,7 +4,24 @@
 # endblock
 
 # block content
-    <h1 class="ui header">Taggers</h1>
+    <h1 class="ui header">Datasets</h1>
+    <div class="ui cards">
+    # for tagger in taggers:
+        <div class="card">
+            <div class="content">
+                <div class="header">{{ tagger.name }}</div>
+                <div class="description">{{ tagger.description }}</div>
+                <div class="description">&nbsp;</div>    
+                <div class="description"><b>Type</b>: {{ tagger.type.name }}</div>
+            </div>
+        </div>
+    # endfor
+    </div>
+    <br/>
+    <div>
+        <button class="ui large icon button"><i class="ui icon add"></i></button>
+    </div>
+    <!-- {{ counts }} -->
 # endblock
 
 # block afterbody
