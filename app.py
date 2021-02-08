@@ -5,7 +5,7 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_migrate import Migrate
 from sqlalchemy_utils.functions import database_exists
-from sqlalchemy import func
+from sqlalchemy import func,and_
 from yaml import load as yload,FullLoader
 from os.path import exists,join
 from model import DatasetType,Dataset,Tag,TagType,Status,Text,TaggerType,Tagger,db,DatasetTypeView,DatasetView,TextView,TagTypeView,TagView,TaggerView,TaggerTypeView
@@ -14,11 +14,12 @@ from collections import Counter
 from random import random
 
 def register_extensions(app):
-    #print('register_extensions')
+    print('register_extensions')
     db.init_app(app)
 
     with app.app_context():
         if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
+            print('Init db with default values')
             db.create_all()
             db.session.add(DatasetType(name='token-classification'))
             db.session.add(DatasetType(name='text-classification'))
@@ -51,15 +52,15 @@ def create_app():
     app.jinja_env.line_statement_prefix = '#'
     register_extensions(app)
 
-    app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
-    admin = Admin(app, name='tagit', template_mode='bootstrap3')
-    admin.add_view(DatasetTypeView(DatasetType, db.session))
-    admin.add_view(DatasetView(Dataset, db.session))
-    admin.add_view(TextView(Text, db.session))
-    admin.add_view(TagTypeView(TagType, db.session))
-    admin.add_view(TagView(Tag, db.session))
-    admin.add_view(TaggerTypeView(TaggerType, db.session))
-    admin.add_view(TaggerView(Tagger, db.session))
+#    app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
+#    admin = Admin(app, name='tagit', template_mode='bootstrap3')
+#    admin.add_view(DatasetTypeView(DatasetType, db.session))
+#    admin.add_view(DatasetView(Dataset, db.session))
+#    admin.add_view(TextView(Text, db.session))
+#    admin.add_view(TagTypeView(TagType, db.session))
+#    admin.add_view(TagView(Tag, db.session))
+#    admin.add_view(TaggerTypeView(TaggerType, db.session))
+#    admin.add_view(TaggerView(Tagger, db.session))
 
     return app
 
@@ -113,11 +114,11 @@ def text(text_id):
 @app.route('/dataset/<int:dataset_id>/_random')
 def random_text(dataset_id):
     for status in [ Status.UNKNOWN, Status.INCORRECT ]:
-        n_texts = db.session.query(Text).filter(Text.status == status).count()
+        n_texts = Text.query.filter(Text.dataset_id == dataset_id).filter(Text.status == status).count()
 
         if n_texts > 0:
             n = int(n_texts*random())
-            text = db.session.query(Text).filter(Dataset.id == dataset_id, Text.status == status).limit(1).offset(n).first()
+            text = Text.query.filter(Text.dataset_id == dataset_id).filter(Text.status == status).limit(1).offset(n).first()
 
             return Response('', headers={ 'Location': f'/text/{text.id}' }), 303
 
