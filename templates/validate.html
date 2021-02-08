@@ -115,13 +115,13 @@
                 return
             } else {
                 if (currentTagType != "clear" && currentTagType != null) {
-                    document.getElementById("tag_" + currentTagType).className = "ui button inverted " + tag_colors[currentTagType] + " " + currentTagType
+                    document.getElementById("tag_" + currentTagType).className = "ui button basic " + tag_colors[currentTagType] + " " + currentTagType
                 }
 
                 currentTagType = t;
                 
                 if (t != "clear" && t != null) {
-                    document.getElementById("tag_" + t).className = "ui button inverted active " + tag_colors[t] + " " + t
+                    document.getElementById("tag_" + t).className = "ui " + tag_colors[t] + " button " + t
                 }
             }
         }
