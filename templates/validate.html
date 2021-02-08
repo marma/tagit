@@ -52,7 +52,7 @@
         <b>Tags:</b>
         <span id="tags">
         # for tagtype in text.dataset.tag_types:
-        <button id="tag_{{ tagtype.name }}" class="ui button inverted {{tagtype.color}} {{tagtype.name}}" onclick="setTagType('{{tagtype.name}}')">{{ loop.index }} - {{ tagtype.name }}</button>
+        <button id="tag_{{ tagtype.name }}" class="ui button basic {{tagtype.color}} {{tagtype.name}}" onclick="setTagType('{{tagtype.name}}')">{{ loop.index }} - {{ tagtype.name }}</button>
         # endfor
         <button id="tag_clear" class="ui icon button" onclick="setTagType('clear')"><i class="ban alternate icon"></i></button>
         <button class="ui icon button" onclick="reset()"><i class="undo alternate icon"></i></button>
@@ -100,25 +100,36 @@
         }
 
         var originalText = document.getElementById("text").innerHTML
-        var currentTagType = "{{ (text.dataset.tag_types | first).name }}";
+        var currentTagType = null //"{{ (text.dataset.tag_types | first).name }}";
         var currentTag = null
         var inTag = false
 
         function setTagType(t) {
-            if (currentTagType != "clear") {
-                document.getElementById("tag_" + currentTagType).className = "ui button inverted " + tag_colors[currentTagType] + " " + currentTagType
-            }
+            let selection = document.getSelection()
 
-            currentTagType = t;
+            if (selection.toString().length > 0) {
+                if (t != "clear" && t != null) {
+                    tagSelected(selection, t)
+                }
 
-            if (t != "clear") {
-                document.getElementById("tag_" + t).className = "ui button inverted active " + tag_colors[t] + " " + t
+                return
+            } else {
+                if (currentTagType != "clear" && currentTagType != null) {
+                    document.getElementById("tag_" + currentTagType).className = "ui button inverted " + tag_colors[currentTagType] + " " + currentTagType
+                }
+
+                currentTagType = t;
+                
+                if (t != "clear" && t != null) {
+                    document.getElementById("tag_" + t).className = "ui button inverted active " + tag_colors[t] + " " + t
+                }
             }
         }
 
         function reset() {
             document.getElementById("text").innerHTML = originalText
-            setTagType("{{ text.dataset.tag_types[0].name }}");
+            //setTagType("{{ text.dataset.tag_types[0].name }}");
+            setTagType(null)
             $("#text span").attr("onmousedown", "clickTag(this)")
         }
 
@@ -222,13 +233,30 @@
             }
         })
 
+        function tagSelected(selection, tag) {
+            let text = selection
+            range = selection.getRangeAt(0)
+
+            entity = document.createElement("span");
+            entity.setAttribute("class", tag);
+            entity.setAttribute("onmousedown", "clickTag(this)");
+            entity.innerHTML = `${selection}`;
+
+            if (currentTagType == 'clear') {
+                entity = document.createTextNode(entity.innerHTML)
+            }
+
+            range.deleteContents();
+            range.insertNode(entity)
+            selection.empty();
+        }
+
         document.getElementById('text').addEventListener('mouseup', function() {
             let selection = document.getSelection();
             let {anchorNode, anchorOffset, focusNode, focusOffset} = selection;
 
-
             if (selection.toString().replace(/(<([^>]+)>)/gi, "").length <= document.getElementById('text').innerHTML.replace(/(<([^>]+)>)/gi, "").length) {
-                if (selection.toString().length > 0) {
+                if (selection.toString().length > 0 && currentTagType != null) {
                     let text = selection
                     range = selection.getRangeAt(0)
 
@@ -244,6 +272,7 @@
                     range.deleteContents();
                     range.insertNode(entity)
                     selection.empty();
+                    setTagType(null)
                 } else {
                     if (inTag) {
                         if (currentTagType == 'clear') {
@@ -253,12 +282,15 @@
                         }
                     }
                 }
+            } else {
+                selection.empty()
             }
 
-            selection.empty()
-            inTag = false
-            currentTag = null
-
+            if (currentTagType != null) {
+                selection.empty()
+                inTag = false
+                currentTag = null
+            }
         }, false);
     </script>
 # endblock

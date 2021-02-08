@@ -31,7 +31,7 @@ def register_extensions(app):
             db.session.add(TagType(name='EVN', color='green'))
             db.session.add(TagType(name='OBJ', color='purple'))
             db.session.add(TagType(name='TME', color='pink'))
-            db.session.add(TagType(name='MSR', color='pink'))
+            db.session.add(TagType(name='MSR', color='brown'))
             db.session.add(TaggerType(name='token-classification'))
             db.session.add(TaggerType(name='text-classification'))
             db.session.add(TaggerType(name='question-answering'))
@@ -52,15 +52,15 @@ def create_app():
     app.jinja_env.line_statement_prefix = '#'
     register_extensions(app)
 
-#    app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
-#    admin = Admin(app, name='tagit', template_mode='bootstrap3')
-#    admin.add_view(DatasetTypeView(DatasetType, db.session))
-#    admin.add_view(DatasetView(Dataset, db.session))
-#    admin.add_view(TextView(Text, db.session))
-#    admin.add_view(TagTypeView(TagType, db.session))
-#    admin.add_view(TagView(Tag, db.session))
-#    admin.add_view(TaggerTypeView(TaggerType, db.session))
-#    admin.add_view(TaggerView(Tagger, db.session))
+    app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
+    admin = Admin(app, name='tagit', template_mode='bootstrap3')
+    admin.add_view(DatasetTypeView(DatasetType, db.session))
+    admin.add_view(DatasetView(Dataset, db.session))
+    admin.add_view(TextView(Text, db.session))
+    admin.add_view(TagTypeView(TagType, db.session))
+    admin.add_view(TagView(Tag, db.session))
+    admin.add_view(TaggerTypeView(TaggerType, db.session))
+    admin.add_view(TaggerView(Tagger, db.session))
 
     return app
 
