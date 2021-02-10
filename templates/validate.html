@@ -32,14 +32,14 @@
             }
 
             .{{ tagtype.name }}::after {
-                //content: "1{{ tagtype.name }}";
+                content: " {{ tagtype.name }}";
                 color: white;
-                padding: 0.2em;
-                margin-left: 0.5em;
-                border-radius: 0.25em;
+                //padding: 0.1em;
+                //margin-left: 0.2em;
+                //border-radius: 0.25em;
                 font-family: sans-serif;
-                //font-size: 0.75em;
-                background: {{ tagtype.color }};
+                font-size: 0.5em;
+                //background: {{ tagtype.color }};
             }
 
             #   endfor
@@ -52,7 +52,7 @@
         <b>Tags:</b>
         <span id="tags">
         # for tagtype in text.dataset.tag_types:
-        <button id="tag_{{ tagtype.name }}" class="ui button basic {{tagtype.color}} {{tagtype.name}}" onclick="setTagType('{{tagtype.name}}')">{{ loop.index }} - {{ tagtype.name }}</button>
+        <button id="tag_{{ tagtype.name }}" class="ui button basic {{tagtype.color}}" onclick="setTagType('{{tagtype.name}}')">{{ loop.index }} - {{ tagtype.name }}</button>
         # endfor
         <button id="tag_clear" class="ui icon button" onclick="setTagType('clear')"><i class="ban alternate icon"></i></button>
         <button class="ui icon button" onclick="reset()"><i class="undo alternate icon"></i></button>
