@@ -30,7 +30,7 @@
                 -ms-user-select: none;
                 user-select: none;
             }
-
+/*
             .{{ tagtype.name }}::after {
                 content: " {{ tagtype.name }}";
                 vertical-align: middle;
@@ -44,7 +44,7 @@
                 font-size: 0.5em;
                 //background: black;
             }
-
+*/
             #   endfor
             # endif
 # endblock
@@ -118,13 +118,13 @@
                 return
             } else {
                 if (currentTagType != "clear" && currentTagType != null) {
-                    document.getElementById("tag_" + currentTagType).className = "ui button basic " + tag_colors[currentTagType] + " " + currentTagType
+                    document.getElementById("tag_" + currentTagType).className = "ui button basic " + tag_colors[currentTagType]
                 }
 
                 currentTagType = t;
                 
                 if (t != "clear" && t != null) {
-                    document.getElementById("tag_" + t).className = "ui " + tag_colors[t] + " button " + t
+                    document.getElementById("tag_" + t).className = "ui " + tag_colors[t] + " button "
                 }
             }
         }
