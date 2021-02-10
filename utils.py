@@ -21,7 +21,5 @@ def tag_content(content, tags):
 
         offset += len(start_tag) + len(end_tag)
 
-        print(content)
-
     return content
 

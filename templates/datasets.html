@@ -20,7 +20,7 @@
             <div class="extra content">
                 <div class="ui tiny buttons">
                     <a class="ui green button" href="/dataset/{{ dataset.id }}">View</a>
-                    # if counts[dataset.id]['UNKNOWN'] > 0:
+                    # if counts[dataset.id]['UNKNOWN'] > 0 or counts[dataset.id]['INCORRECT']:
                     <a class="ui green button" href="/dataset/{{ dataset.id }}/_random">Verify</a>
                     # else
                     <div class="ui green disabled button">Verify</div>

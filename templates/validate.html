@@ -165,38 +165,33 @@
         function submit_verified() {
             data = { text_id: {{ text.id }}, status: "verified", tags: get_tags() }
             
-            fetch("/_validate", { method: "POST", body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' }})
+            postData("/_validate", data)
                 .then(data => console.log(data))
-
-            window.location = "/dataset/{{ text.dataset.id }}/_random"
-            //originalText = document.getElementById("text").innerHTML
+                .then(data => window.location = "/dataset/{{ text.dataset.id }}/_random")
         }
 
         function submit_incorrect() {
             data = { text_id: {{ text.id }}, status: "incorrect" }
             
-            fetch("/_validate", { method: "POST", body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' }})
+            postData("/_validate", data)
                 .then(data => console.log(data))
-
-            window.location = "/dataset/{{ text.dataset.id }}/_random";
+                .then(data => window.location = "/dataset/{{ text.dataset.id }}/_random")
         }
 
         function submit_broken() {
             data = { text_id: {{ text.id }}, status: "broken" }
             
-            fetch("/_validate", { method: "POST", body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' }})
+            postData("/_validate", data)
                 .then(data => console.log(data))
-
-            window.location = "/dataset/{{ text.dataset.id }}/_random"
+                .then(data => window.location = "/dataset/{{ text.dataset.id }}/_random")
         }
 
         function submit_deleted() {
             data = { text_id: {{ text.id }}, status: "deleted" }
             
-            fetch("/_validate", { method: "POST", body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' }})
+            postData("/_validate", data)
                 .then(data => console.log(data))
-
-            window.location = "/dataset/{{ text.dataset.id }}/_random"
+                .then(data => window.location = "/dataset/{{ text.dataset.id }}/_random")
         }
 
         function skip() {
@@ -292,5 +287,24 @@
                 currentTag = null
             }
         }, false);
+
+        // Example POST method implementation:
+        async function postData(url = '', data = {}) {
+          // Default options are marked with *
+          const response = await fetch(url, {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'same-origin', // no-cors, *cors, same-origin
+            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+            credentials: 'same-origin', // include, *same-origin, omit
+            headers: {
+              'Content-Type': 'application/json'
+              // 'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            redirect: 'follow', // manual, *follow, error
+            referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+            body: JSON.stringify(data) // body data type must match "Content-Type" header
+          });
+          return response.json(); // parses JSON response into native JavaScript objects
+        }
     </script>
 # endblock

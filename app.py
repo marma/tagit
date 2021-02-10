@@ -12,6 +12,7 @@ from model import DatasetType,Dataset,Tag,TagType,Status,Text,TaggerType,Tagger,
 from utils import tag_content
 from collections import Counter
 from random import random
+from json import dumps
 
 def register_extensions(app):
     print('register_extensions')
@@ -246,6 +247,8 @@ def validate():
             if tt.name == tname:
                 return tt.id
 
+    print(request)
+
     data = request.json
     text_id = data['text_id']
     status = data['status']
@@ -287,5 +290,5 @@ def validate():
         
     db.session.commit()
 
-    return "OK"
+    return Response(dumps({ "status": "OK" }), headers={ "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" })
 
