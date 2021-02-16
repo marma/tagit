@@ -64,10 +64,11 @@
     <div id="text">{{ tagged | safe }}</div>
     <div style="width: 100%; text-align: center">
         <div class="ui buttons">
-            <button class="ui button" onclick="submit_verified()" data-variation="basic" data-position="bottom center" data-content="Submit verified (enter)"><i class="check circle icon green"></i></button>
-            <button class="ui button" onclick="submit_incorrect()"><i class="close icon red"></i></button>
-            <button class="ui button" onclick="submit_deleted()"><i class="trash icon"></i></button>
-            <button class="ui button" onclick="submit_broken()"><i class="exclamation triangle icon red"></i></button>
+            <button class="ui button" onclick="submit('verified')" data-variation="basic" data-position="bottom center" data-content="Submit verified (enter)"><i class="check circle icon green"></i></button>
+            <button class="ui button" onclick="submit('incorrect')"><i class="close icon red"></i></button>
+            <button class="ui button" onclick="submit('mysterious')"><i class="question circle icon"></i></button>
+            <button class="ui button" onclick="submit('deleted')"><i class="trash icon"></i></button>
+            <button class="ui button" onclick="submit('broken')"><i class="exclamation triangle icon red"></i></button>
             <button class="ui button" onclick="skip()"><i class="right arrow icon"></i></button>
         </div>
     </div>
@@ -81,10 +82,11 @@
         </ul>
         <div><b>If unable to correct mistakes</b>:</div>
         <ul>
-            <li>Press <b>x</b> or click cross to submit text as <b>incorrect</b>, or</li>
-            <li>Press <b>right arrow</b> to skip, or</li>
-            <li>Click <b>trashcan</b> to mark for deletion, or</li>
-            <li>Click <b>"warning sign"</b> to mark as broken</li>
+            <li>Press <b>x</b> or click <i class="close icon red"></i> to submit text as <b>incorrect</b>, or</li>
+            <li>Click <i class="question circle icon"></i> to mark as unclear / unknown, or</li>
+            <li>Press <i class="right arrow icon"></i> to skip, or</li>
+            <li>Click <i class="trash icon"></i> to mark for deletion, or</li>
+            <li>Click <i class="exclamation triangle icon red"></i> to mark as broken</li>
         </ul>
         <div><b>On erroneous click</b>:</div>
         <ul>
@@ -106,6 +108,7 @@
         var currentTagType = null //"{{ (text.dataset.tag_types | first).name }}";
         var currentTag = null
         var inTag = false
+        var textType = new URL(location.href).searchParams.get("type", null)
 
         function setTagType(t) {
             let selection = document.getSelection()
@@ -165,6 +168,23 @@
             return tags
         }
 
+        function submit(status) {
+            if (status == undefined) {
+                alert("status:" + status)
+                return
+            }
+
+            var data = { text_id: {{ text.id }}, status: status }
+            
+            if (status == 'verified') {
+                data["tags"] = get_tags()
+            }
+
+            postData("/_validate", data)
+                .then(data => console.log(data))
+                .then(data => window.location = ("/dataset/{{ text.dataset.id }}/_random" + ((textType == null)? "":("?type=" + textType))))
+        }
+
         function submit_verified() {
             data = { text_id: {{ text.id }}, status: "verified", tags: get_tags() }
             
@@ -197,8 +217,16 @@
                 .then(data => window.location = "/dataset/{{ text.dataset.id }}/_random")
         }
 
+        function submit_mysterious() {
+            data = { text_id: {{ text.id }}, status: "mysterious" }
+            
+            postData("/_validate", data)
+                .then(data => console.log(data))
+                .then(data => window.location = "/dataset/{{ text.dataset.id }}/_random")
+        }
+
         function skip() {
-            window.location = "/dataset/{{ text.dataset.id }}/_random"
+            window.location = "/dataset/{{ text.dataset.id }}/_random" + (textType == null)? "":("?type=" + textType)
         }
 
         //$('.button')

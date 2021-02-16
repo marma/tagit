@@ -12,6 +12,7 @@ class Status(Enum):
     CHANGED = 5
     GENERATED = 6
     PARTIAL = 7
+    MYSTERIOUS = 8
 
 class DatasetType(db.Model):
     __tablename__ = 'datasettype'

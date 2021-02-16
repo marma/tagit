@@ -112,18 +112,22 @@ def text(text_id):
     else:
         return 'Not found', 404
 
+
 @app.route('/dataset/<int:dataset_id>/_random')
 def random_text(dataset_id):
-    for status in [ Status.UNKNOWN, Status.INCORRECT ]:
+    statuses = [ Status[request.args['type'].upper()]] if 'type' in request.args else [ Status.UNKNOWN, Status.INCORRECT ]
+
+    for status in statuses:
         n_texts = Text.query.filter(Text.dataset_id == dataset_id).filter(Text.status == status).count()
 
         if n_texts > 0:
             n = int(n_texts*random())
             text = Text.query.filter(Text.dataset_id == dataset_id).filter(Text.status == status).limit(1).offset(n).first()
 
-            return Response('', headers={ 'Location': f'/text/{text.id}' }), 303
+            return Response('', headers={ 'Location': f'/text/{text.id}{("?type=" + request.args["type"]) if "type" in request.args else ""}' }), 303
 
     return Response('', headers={ 'Location': f'/datasets/' }), 303
+
 
 @app.route('/dataset/<int:dataset_id>/add', methods=[ 'GET' ])
 def add_texts(dataset_id):
@@ -247,8 +251,6 @@ def validate():
             if tt.name == tname:
                 return tt.id
 
-    print(request)
-
     data = request.json
     text_id = data['text_id']
     status = data['status']
@@ -287,6 +289,8 @@ def validate():
         text.status = Status.INCORRECT
     elif status == 'unknown':
         text.status = Status.UNKNOWN
+    elif status == 'mysterious':
+        text.status = Status.MYSTERIOUS
         
     db.session.commit()
 
