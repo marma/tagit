@@ -76,11 +76,11 @@
         <div><b>Instructions</b>:</div>
         <ul>
             <li>Check for mistakes and if found do the following</li>
+            <li>Select part of text to assign</li>
             <li>Press <b>1-9</b> to select tag type or press <b>0</b> to set mode to clear tags</li>
-            <li>Select part of text to assign (or clear) current tag.</li>
-            <li>Press <b>enter</b> or click checkmark to submit text as <b>correct</b></li>
+            <li>Press <b>enter</b> or click <i class="check circle icon green"></i> to submit text as <b>correct</b></li>
         </ul>
-        <div><b>If unable to correct mistakes</b>:</div>
+        <div><b>If, for any reason, unable to correct mistakes</b>:</div>
         <ul>
             <li>Press <b>x</b> or click <i class="close icon red"></i> to submit text as <b>incorrect</b>, or</li>
             <li>Click <i class="question circle icon"></i> to mark as unclear / unknown, or</li>
@@ -180,53 +180,13 @@
                 data["tags"] = get_tags()
             }
 
-            postData("/_validate", data)
+            postData("/tag/_validate", data)
                 .then(data => console.log(data))
-                .then(data => window.location = ("/dataset/{{ text.dataset.id }}/_random" + ((textType == null)? "":("?type=" + textType))))
-        }
-
-        function submit_verified() {
-            data = { text_id: {{ text.id }}, status: "verified", tags: get_tags() }
-            
-            postData("/_validate", data)
-                .then(data => console.log(data))
-                .then(data => window.location = "/dataset/{{ text.dataset.id }}/_random")
-        }
-
-        function submit_incorrect() {
-            data = { text_id: {{ text.id }}, status: "incorrect" }
-            
-            postData("/_validate", data)
-                .then(data => console.log(data))
-                .then(data => window.location = "/dataset/{{ text.dataset.id }}/_random")
-        }
-
-        function submit_broken() {
-            data = { text_id: {{ text.id }}, status: "broken" }
-            
-            postData("/_validate", data)
-                .then(data => console.log(data))
-                .then(data => window.location = "/dataset/{{ text.dataset.id }}/_random")
-        }
-
-        function submit_deleted() {
-            data = { text_id: {{ text.id }}, status: "deleted" }
-            
-            postData("/_validate", data)
-                .then(data => console.log(data))
-                .then(data => window.location = "/dataset/{{ text.dataset.id }}/_random")
-        }
-
-        function submit_mysterious() {
-            data = { text_id: {{ text.id }}, status: "mysterious" }
-            
-            postData("/_validate", data)
-                .then(data => console.log(data))
-                .then(data => window.location = "/dataset/{{ text.dataset.id }}/_random")
+                .then(data => window.location = ("/tag/dataset/{{ text.dataset.id }}/_random" + ((textType == null)? "":("?type=" + textType))))
         }
 
         function skip() {
-            window.location = "/dataset/{{ text.dataset.id }}/_random" + (textType == null)? "":("?type=" + textType)
+            window.location = "/tag/dataset/{{ text.dataset.id }}/_random" + (textType == null)? "":("?type=" + textType)
         }
 
         //$('.button')
@@ -323,9 +283,9 @@
         async function postData(url = '', data = {}) {
           // Default options are marked with *
           const response = await fetch(url, {
-            method: 'POST', // *GET, POST, PUT, DELETE, etc.
-            mode: 'same-origin', // no-cors, *cors, same-origin
-            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+            method: 'POST',             // *GET, POST, PUT, DELETE, etc.
+            mode: 'same-origin',        // no-cors, *cors, same-origin
+            cache: 'no-cache',          // *default, no-cache, reload, force-cache, only-if-cached
             credentials: 'same-origin', // include, *same-origin, omit
             headers: {
               'Content-Type': 'application/json'

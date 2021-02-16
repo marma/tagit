@@ -8,9 +8,9 @@
 
         <title>{{ request.headers.get('Host') | default(None) }}</title>
 
-        <link rel="stylesheet" type="text/css" href="/static/js/Semantic-UI-CSS-2.4.1/semantic.min.css"></script>
-        <script src="/static/js/jquery-3.5.1.min.js"></script>
-        <script src="/static/js/Semantic-UI-CSS-2.4.1/semantic.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="/tag/static/js/Semantic-UI-CSS-2.4.1/semantic.min.css"></script>
+        <script src="/tag/static/js/jquery-3.5.1.min.js"></script>
+        <script src="/tag/static/js/Semantic-UI-CSS-2.4.1/semantic.min.js"></script>
 
         # block head
         # endblock
@@ -54,11 +54,11 @@
         <div class="ui fixed inverted menu">
             <div class="ui container">
                 <div class="header item">
-                    <img class="logo" src="/static/favicon.svg"> {{ request.headers.get('Host') | default(None) }}
+                    <img class="logo" src="/tag/static/favicon.svg"> {{ request.headers.get('Host') | default(None) }}
                 </div>
-                <a href="/" class="item">Home</a>
-                <a href="/datasets/" class="item">Datasets</a>
-                <a href="/taggers/" class="item">Taggers</a>
+                <a href="/tag/" class="item">Home</a>
+                <a href="/tag/datasets/" class="item">Datasets</a>
+                <a href="/tag/taggers/" class="item">Taggers</a>
             </div>
         </div>
 

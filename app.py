@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask,request,render_template,Response
+from flask import Flask,request,render_template,Response,redirect
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_migrate import Migrate
@@ -44,6 +44,8 @@ def register_extensions(app):
 def create_app():
     app = Flask(__name__)
 
+    app.config["APPLICATION_ROOT"] = "/tag"
+    
     #app.config.from_yaml(app.root_path)
     config_path = join(app.root_path, 'config.yml')
     if exists(config_path):
@@ -54,7 +56,7 @@ def create_app():
     register_extensions(app)
 
     app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
-    admin = Admin(app, name='tagit', template_mode='bootstrap3')
+    admin = Admin(app, name='tagit', template_mode='bootstrap3', url='/tag/admin')
     admin.add_view(DatasetTypeView(DatasetType, db.session))
     admin.add_view(DatasetView(Dataset, db.session))
     admin.add_view(TextView(Text, db.session))
@@ -63,17 +65,18 @@ def create_app():
     admin.add_view(TaggerTypeView(TaggerType, db.session))
     admin.add_view(TaggerView(Tagger, db.session))
 
+
     return app
 
 app = create_app()
 migrate = Migrate(app, db)
 
-@app.route('/')
+@app.route('/tag/')
 def index():
-    return Response('', headers={ 'Location': '/datasets/' }), 303
+    return redirect('/tag/datasets/')
 
 
-@app.route('/datasets/')
+@app.route('/tag/datasets/')
 def datasets():
     datasets = datasets=Dataset.query.all()
     counts = { dataset.id:Counter() for dataset in datasets }   
@@ -91,19 +94,19 @@ def datasets():
     return render_template('datasets.html', datasets=datasets, counts=counts)
 
 
-@app.route('/taggers/')
+@app.route('/tag/taggers/')
 def taggers():
     return render_template('taggers.html', taggers=Tagger.query.all())
 
 
-@app.route('/dataset/<int:dataset_id>')
+@app.route('/tag/dataset/<int:dataset_id>')
 def dataset(dataset_id):
     dataset = db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
 
     return render_template('dataset.html', dataset=dataset)
 
 
-@app.route('/text/<int:text_id>')
+@app.route('/tag/text/<int:text_id>')
 def text(text_id):
     text = db.session.query(Text).filter(Text.id == text_id).first()
 
@@ -113,7 +116,7 @@ def text(text_id):
         return 'Not found', 404
 
 
-@app.route('/dataset/<int:dataset_id>/_random')
+@app.route('/tag/dataset/<int:dataset_id>/_random')
 def random_text(dataset_id):
     statuses = [ Status[request.args['type'].upper()]] if 'type' in request.args else [ Status.UNKNOWN, Status.INCORRECT ]
 
@@ -124,18 +127,19 @@ def random_text(dataset_id):
             n = int(n_texts*random())
             text = Text.query.filter(Text.dataset_id == dataset_id).filter(Text.status == status).limit(1).offset(n).first()
 
-            return Response('', headers={ 'Location': f'/text/{text.id}{("?type=" + request.args["type"]) if "type" in request.args else ""}' }), 303
+            return redirect(f'/tag/text/{text.id}{("?type=" + request.args["type"]) if "type" in request.args else ""}')
 
-    return Response('', headers={ 'Location': f'/datasets/' }), 303
+    return redirect(f'/tag/datasets/')
 
 
-@app.route('/dataset/<int:dataset_id>/add', methods=[ 'GET' ])
+@app.route('/tag/dataset/<int:dataset_id>/add', methods=[ 'GET' ])
 def add_texts(dataset_id):
     dataset = db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
 
     return render_template('add_texts.html', dataset=dataset)
 
-@app.route('/dataset/<int:dataset_id>/add', methods=[ 'POST' ])
+
+@app.route('/tag/dataset/<int:dataset_id>/add', methods=[ 'POST' ])
 def post_add_texts(dataset_id):
     def get_type_id(tname, text):
         #print(tname, text)
@@ -228,10 +232,10 @@ def post_add_texts(dataset_id):
 
         #print(text, tags)
 
-    return Response('', headers={ 'Location': f'/dataset/{dataset_id}' }), 303
+    return redirect(f'/dataset/{dataset_id}')
 
 
-@app.route('/_validate', methods=[ 'POST' ])
+@app.route('/tag/_validate', methods=[ 'POST' ])
 def validate():
     def tag_equals(t1, t2):
         if isinstance(t1, dict):
