@@ -186,7 +186,8 @@
         }
 
         function skip() {
-            window.location = "/tag/dataset/{{ text.dataset.id }}/_random" + (textType == null)? "":("?type=" + textType)
+	    u = "https://betalab.kb.se/tag/dataset/{{ text.dataset.id }}/_random" + ((textType == null)? "":("?type=" + textType))
+	    window.location = u
         }
 
         //$('.button')
@@ -203,10 +204,10 @@
 
             if (e.keyCode == 13) {
                 // submit verified
-                submit_verified()
+                submit('verified')
             } else if (e.key == 'x') {
                 // submit incorrect
-                submit_incorrect()
+                submit('incorrect')
             } else if (e.keyCode == 39) {
                 // skip
                 skip()
