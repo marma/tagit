@@ -263,10 +263,16 @@ def validate():
     if status in [ 'verified' ]:
         tags = data['tags']
 
+        print(tags)
+
         add = []
         delete = []
 
         for t in tags:
+            if t['tag'] == None:
+                print(f'warning: invalid tag {t}. text: {text}, tags: {tags}')
+                continue
+
             if not in_tags(t, text.tags):
                 add += [ t ]
 
